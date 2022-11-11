@@ -1,6 +1,7 @@
 package piece
 
-import Board
+import Constants
+import Game
 import Position
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -14,6 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -30,28 +33,39 @@ interface Piece {
 
 @ExperimentalFoundationApi
 @Composable
-fun PieceView(board: Board, piece: Piece?) {
+fun PieceView(game: Game, piece: Piece?) {
     piece ?: return
     var prevOffset = Offset(0f, 0f)
     val offset = mutableStateOf(prevOffset)
 
-    Box(modifier = Modifier.size(120.dp)) {
+    val squareSize = Constants.SQUARE_SIZE
+
+    Box(Modifier.size(squareSize.dp)) {
         Image(
             painter = painterResource("${piece.name}_${piece.color}.svg"),
-            contentDescription = "White piece.type.King",
+            contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
             modifier = Modifier.fillMaxSize().zIndex(100f).offset {
                 IntOffset(offset.value.x.toInt(), offset.value.y.toInt())
             }.onDrag(
                 onDragEnd = {
-                    offset.value = Offset(round(offset.value.x / 120f) * 120f, round(offset.value.y / 120f) * 120f)
-//                    println(Position((piece.position.first + (offset.value.y / 120)).toInt(), (piece.position.second + (offset.value.x / 120)).toInt()))
-                    val newPositionX = (piece.position.first + ((offset.value.y - prevOffset.y) / 120)).toInt()
-                    val newPositionY = (piece.position.second + ((offset.value.x - prevOffset.x) / 120)).toInt()
-                    board.move(piece.position, Position(newPositionX, newPositionY))
-                    println(board)
+                    // Move piece to center of square on release
+                    offset.value = Offset(round(offset.value.x / squareSize) * squareSize, round(offset.value.y / squareSize) * squareSize)
+
+                    // Move piece in internal game logic
+                    val newPositionX = (piece.position.first + ((offset.value.y - prevOffset.y) / squareSize)).toInt()
+                    val newPositionY = (piece.position.second + ((offset.value.x - prevOffset.x) / squareSize)).toInt()
+                    val moved = game.board.value.move(piece.position, Position(newPositionX, newPositionY))
+
+                    // Don't end the turn if the move was not successful
+                    if (!moved) return@onDrag
+                    game.state.endTurn()
+
+                    println(game.board.value)
+
                     prevOffset = offset.value
                 }
             ) {
+                if (piece.color != game.state.turn.value) return@onDrag
                 offset.value += it
             }
         )

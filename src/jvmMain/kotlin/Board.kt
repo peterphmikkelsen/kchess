@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -42,11 +41,11 @@ class Board {
         }
     }
 
-    fun move(from: Position, to: Position) {
-        if (from == to) return
+    fun move(from: Position, to: Position): Boolean {
+        if (from == to) return false
 
-        val piece = board[from.first][from.second] ?: return
-        if (!piece.isValidMove(board, to)) return
+        val piece = board[from.first][from.second] ?: return false
+        if (!piece.isValidMove(board, to)) return false
 
         // Make move on board
         // TODO: Handle attack logic
@@ -55,6 +54,8 @@ class Board {
 
         // Update piece position
         piece.position = to
+
+        return true
     }
 
     operator fun get(position: Position): Piece? {
@@ -74,19 +75,19 @@ class Board {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BoardView(board: MutableState<Board>) {
+fun BoardView(game: Game) {
     Box {
         Column {
             repeat(8) { column ->
                 Row {
                     repeat(8) { row ->
-                        val color: Color = if (column % 2 == 0) {
+                        val color = if (column % 2 == 0) {
                             if (row % 2 == 0) Color.LightSquare else Color.DarkSquare
                         } else {
                             if (row % 2 == 0) Color.DarkSquare else Color.LightSquare
                         }
-                        Box(modifier = Modifier.size(120.dp).zIndex(200f).background(color)) {
-                            PieceView(board.value, board.value[Position(column, row)])
+                        Box(Modifier.size(Constants.SQUARE_SIZE.dp).zIndex(200f).background(color)) {
+                            PieceView(game, game.board.value[Position(column, row)])
                         }
                     }
                 }
