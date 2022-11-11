@@ -27,32 +27,16 @@ class Game {
     fun winner(): Boolean {
         return true
     }
-
-}
-
-data class GameState(
-    var turn: MutableState<PieceColor> = mutableStateOf(PieceColor.WHITE),
-    var view: MutableState<Boolean> = mutableStateOf(true))
-{
-
-    fun checkTurn(): Boolean {
-        return turn.value == PieceColor.WHITE
-    }
-    fun endTurn() {
-        turn.value = if (turn.value == PieceColor.WHITE) PieceColor.BLACK else PieceColor.WHITE
-    }
-
-    fun flipView() {
-        view.value = !view.value
-    }
 }
 
 @Composable
 @Preview
 fun GameView() {
     val game = remember { Game() }
-    Row(Modifier.fillMaxSize().background(Color(0xfff9f9f9))) {
+    Row(Modifier.fillMaxSize().background(Constants.BACKGROUND_COLOR)) {
         BoardView(game)
+
+        // TODO: Move to separate Composable
         Box(Modifier.size(50.dp)
             .padding(10.dp)
             .border(1.dp, Color.DarkGray)
