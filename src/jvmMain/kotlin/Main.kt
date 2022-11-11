@@ -4,7 +4,7 @@ import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.singleWindowApplication
 
 fun main() = singleWindowApplication(
-    title = "Kotlin Chess", state = WindowState(size = DpSize(1000.dp, 1000.dp))
+    title = "Kotlin Chess", state = WindowState(size = DpSize(1200.dp, 1000.dp))
 ) {
     GameView()
 }
