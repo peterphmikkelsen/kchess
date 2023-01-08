@@ -33,14 +33,19 @@ class Game {
 @Preview
 fun GameView() {
     val game = remember { Game() }
-    Row(Modifier.fillMaxSize().background(Constants.BACKGROUND_COLOR)) {
-        BoardView(game)
+    Box(Modifier.fillMaxSize().background(Constants.BACKGROUND_COLOR)) {
+        Row {
+            Box(Modifier.size((8 * Constants.SQUARE_SIZE).dp).border(3.dp, Color.Black)) {
+                BoardView()
+                PieceBoardView(game)
+            }
 
-        // TODO: Move to separate Composable
-        Box(Modifier.size(50.dp)
-            .padding(10.dp)
-            .border(1.dp, Color.DarkGray)
-            .background(if (game.state.checkTurn()) Color.White else Color.Black)
-        ) {}
+            // TODO: Move to separate Composable
+            Box(Modifier.size(50.dp)
+                .padding(10.dp)
+                .border(1.dp, Color.DarkGray)
+                .background(if (game.state.checkTurn()) Color.White else Color.Black)
+            ) {}
+        }
     }
 }

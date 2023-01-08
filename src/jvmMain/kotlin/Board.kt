@@ -1,12 +1,17 @@
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.onClick
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.traceEventEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import piece.Piece
@@ -28,7 +33,7 @@ class Board {
                 // Handle other pieces
                 if (i == 0 || i == 7) {
                     val color = if (i == 0) PieceColor.BLACK else PieceColor.WHITE
-                    board[i][j] = when(j) {
+                    board[i][j] = when (j) {
                         4 -> King(color, position)
                         3 -> Queen(color, position)
                         2, 5 -> Bishop(color, position)
@@ -73,9 +78,8 @@ class Board {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BoardView(game: Game) {
+fun BoardView() {
     Box {
         Column {
             repeat(8) { column ->
@@ -86,15 +90,31 @@ fun BoardView(game: Game) {
                         } else {
                             if (row % 2 == 0) Color.DarkSquare else Color.LightSquare
                         }
-                        Box(Modifier.size(Constants.SQUARE_SIZE.dp).zIndex(200f).background(color)) {
-                            PieceView(game, game.board.value[Position(column, row)])
-                        }
+                        Box(Modifier.size(Constants.SQUARE_SIZE.dp).background(color)) {}
                     }
                 }
             }
         }
     }
 }
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PieceBoardView(game: Game) {
+    for (i in 0 until 8) {
+        for (j in 0 until 8) {
+            PieceView(game, game.board.value[Position(j, i)])
+        }
+    }
+}
+
+fun Modifier.absolutePosition(x: Int, y: Int) =
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        layout(placeable.width, placeable.height) {
+            placeable.placeRelative(x, y)
+        }
+    }
 
 
 val Color.Companion.DarkSquare: Color
