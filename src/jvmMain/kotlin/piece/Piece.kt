@@ -27,7 +27,16 @@ interface Piece {
     val name: String
     val color: PieceColor
     var position: Position
+    var state: PieceState
     fun isValidMove(board: Array<Array<Piece?>>, to: Position): Boolean
+
+    fun focus() {
+        state.focused.value = true
+    }
+
+    fun unFocus() {
+        state.focused.value = false
+    }
 }
 
 @ExperimentalFoundationApi
@@ -43,8 +52,9 @@ fun PieceView(game: Game, piece: Piece?) {
             modifier = Modifier.fillMaxSize()
                 .offset { IntOffset(offset.value.x.toInt(), offset.value.y.toInt()) }
                 .onDrag(
-//                    onDragStart = { println(it); prevOffset.value = it },
+                    onDragStart = { piece.focus() },
                     onDragEnd = {
+                        println(piece.state.focused.value)
                         // Move piece to center of square on release
                         offset.value = offset.centerToSquare()
 
@@ -55,13 +65,16 @@ fun PieceView(game: Game, piece: Piece?) {
                         if (!moved) {
                             // Reset position
                             offset.value = piece.toWindowPosition()
+                            piece.unFocus()
                             return@onDrag
                         }
 
                         // TODO: Fix bug that increases offset when this is on
                         // game.state.endTurn()
+                        game.endTurn()
 
                         println(game.board.value)
+                        piece.unFocus()
                     }
                 ) {
                     if (piece.color != game.state.turn.value) return@onDrag

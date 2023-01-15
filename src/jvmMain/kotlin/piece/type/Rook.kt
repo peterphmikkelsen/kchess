@@ -3,8 +3,13 @@ package piece.type
 import Position
 import piece.Piece
 import piece.PieceColor
+import piece.PieceState
 
-class Rook(override val color: PieceColor, override var position: Position): Piece {
+class Rook(
+    override val color: PieceColor,
+    override var position: Position,
+    override var state: PieceState = PieceState()
+): Piece {
     override val name: String
         get() = "rook"
 
