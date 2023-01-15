@@ -1,19 +1,11 @@
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.onClick
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.traceEventEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import piece.Piece
 import piece.PieceColor
 import piece.PieceView
@@ -50,6 +42,9 @@ class Board {
         if (from == to) return false
 
         val piece = board[from.first][from.second] ?: return false
+        val toPiece = board[to.first][to.second]
+
+        if (toPiece != null && piece.color == toPiece.color) return false
         if (!piece.isValidMove(board, to)) return false
 
         // Make move on board
@@ -65,6 +60,12 @@ class Board {
 
     operator fun get(position: Position): Piece? {
         return board[position.first][position.second]
+    }
+
+    fun getPieces(): MutableList<Piece> {
+        val pieces = mutableListOf<Piece>()
+        this.board.forEach { pieces.addAll(it.filterNotNull()) }
+        return pieces
     }
 
     override fun toString(): String {
@@ -101,21 +102,9 @@ fun BoardView() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PieceBoardView(game: Game) {
-    for (i in 0 until 8) {
-        for (j in 0 until 8) {
-            PieceView(game, game.board.value[Position(j, i)])
-        }
-    }
+    for (piece in game.board.value.getPieces())
+        PieceView(game, piece)
 }
-
-fun Modifier.absolutePosition(x: Int, y: Int) =
-    layout { measurable, constraints ->
-        val placeable = measurable.measure(constraints)
-        layout(placeable.width, placeable.height) {
-            placeable.placeRelative(x, y)
-        }
-    }
-
 
 val Color.Companion.DarkSquare: Color
     get() = this.DarkGray

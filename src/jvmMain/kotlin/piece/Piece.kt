@@ -3,16 +3,15 @@ package piece
 import Constants
 import Game
 import Position
-import absolutePosition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.onDrag
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -21,12 +20,10 @@ import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import kotlin.math.roundToInt
 
 
 interface Piece {
-
     val name: String
     val color: PieceColor
     var position: Position
@@ -37,8 +34,7 @@ interface Piece {
 @Composable
 fun PieceView(game: Game, piece: Piece?) {
     piece ?: return
-    val squareOffset = Constants.SQUARE_SIZE * 2
-    val offset = mutableStateOf(Offset(piece.position.second * squareOffset, piece.position.first * squareOffset))
+    val offset = mutableStateOf(piece.toWindowPosition())
 
     Box(Modifier.size(Constants.SQUARE_SIZE.dp)) {
         Image(
@@ -47,20 +43,21 @@ fun PieceView(game: Game, piece: Piece?) {
             modifier = Modifier.fillMaxSize()
                 .offset { IntOffset(offset.value.x.toInt(), offset.value.y.toInt()) }
                 .onDrag(
+//                    onDragStart = { println(it); prevOffset.value = it },
                     onDragEnd = {
                         // Move piece to center of square on release
-                        offset.value = Offset(
-                            (offset.value.x / squareOffset).roundToInt() * squareOffset,
-                            (offset.value.y / squareOffset).roundToInt() * squareOffset
-                        )
+                        offset.value = offset.centerToSquare()
 
                         // Move piece in internal game logic
-                        val newPositionX = (offset.value.y / squareOffset).toInt()
-                        val newPositionY = (offset.value.x / squareOffset).toInt()
-                        val moved = game.board.value.move(piece.position, Position(newPositionX, newPositionY))
+                        val moved = game.board.value.move(piece.position, offset.toLogicalPosition())
 
                         // Don't end the turn if the move was not successful
-                        if (!moved) return@onDrag
+                        if (!moved) {
+                            // Reset position
+                            offset.value = piece.toWindowPosition()
+                            return@onDrag
+                        }
+
                         // TODO: Fix bug that increases offset when this is on
                         // game.state.endTurn()
 
@@ -72,4 +69,24 @@ fun PieceView(game: Game, piece: Piece?) {
                 }
         )
     }
+}
+
+private fun MutableState<Offset>.centerToSquare(): Offset {
+    val squareOffset = Constants.SQUARE_SIZE * 2
+    return Offset(
+        (this.value.x / squareOffset).roundToInt() * squareOffset,
+        (this.value.y / squareOffset).roundToInt() * squareOffset
+    )
+}
+
+private fun Piece.toWindowPosition(): Offset {
+    val squareOffset = Constants.SQUARE_SIZE * 2
+    return Offset(this.position.second * squareOffset, this.position.first * squareOffset)
+}
+
+private fun MutableState<Offset>.toLogicalPosition(): Position {
+    val squareOffset = Constants.SQUARE_SIZE * 2
+    val newPositionY = (this.value.x / squareOffset).roundToInt()
+    val newPositionX = (this.value.y / squareOffset).roundToInt()
+    return Position(newPositionX, newPositionY)
 }
