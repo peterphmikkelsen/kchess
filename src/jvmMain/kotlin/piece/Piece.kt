@@ -15,6 +15,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
@@ -44,7 +45,8 @@ interface Piece {
 @Composable
 fun PieceView(game: Game, piece: Piece?) {
     piece ?: return
-    val offset = mutableStateOf(piece.toWindowPosition())
+    val density = mutableStateOf(LocalDensity.current.density)
+    val offset = mutableStateOf(piece.toWindowPosition(density))
 
     Box(Modifier.size(Constants.SQUARE_SIZE.dp).zIndex(if (piece.state.focused.value) 2f else 1f)) {
         Image(
@@ -55,11 +57,11 @@ fun PieceView(game: Game, piece: Piece?) {
                 .onDrag(
                     onDragStart = { piece.focus() },
                     onDragEnd = {
-                        offset.snapToCenterOfSquare()
+                        offset.snapToCenterOfSquare(density)
 
-                        val moved = game.board.value.move(piece.position, offset.toLogicalPosition())
+                        val moved = game.board.value.move(piece.position, offset.toLogicalPosition(density))
                         if (!moved) {
-                            offset.value = piece.toWindowPosition()
+                            offset.value = piece.toWindowPosition(density)
                             piece.unFocus()
                             return@onDrag
                         }
@@ -68,7 +70,7 @@ fun PieceView(game: Game, piece: Piece?) {
                         piece.unFocus()
                     },
                     onDragCancel = {
-                        offset.value = piece.toWindowPosition()
+                        offset.value = piece.toWindowPosition(density)
                         piece.unFocus()
                     }
                 ) {
@@ -79,21 +81,21 @@ fun PieceView(game: Game, piece: Piece?) {
     }
 }
 
-private fun MutableState<Offset>.snapToCenterOfSquare() {
-    val squareOffset = Constants.SQUARE_SIZE * 2
+private fun MutableState<Offset>.snapToCenterOfSquare(density: MutableState<Float>) {
+    val squareOffset = Constants.SQUARE_SIZE * density.value
     this.value = Offset(
         (this.value.x / squareOffset).roundToInt() * squareOffset,
         (this.value.y / squareOffset).roundToInt() * squareOffset
     )
 }
 
-private fun Piece.toWindowPosition(): Offset {
-    val squareOffset = Constants.SQUARE_SIZE * 2
+private fun Piece.toWindowPosition(density: MutableState<Float>): Offset {
+    val squareOffset = Constants.SQUARE_SIZE * density.value
     return Offset(this.position.second * squareOffset, this.position.first * squareOffset)
 }
 
-private fun MutableState<Offset>.toLogicalPosition(): Position {
-    val squareOffset = Constants.SQUARE_SIZE * 2
+private fun MutableState<Offset>.toLogicalPosition(density: MutableState<Float>): Position {
+    val squareOffset = Constants.SQUARE_SIZE * density.value
     val newPositionY = (this.value.x / squareOffset).roundToInt()
     val newPositionX = (this.value.y / squareOffset).roundToInt()
     return Position(newPositionX, newPositionY)

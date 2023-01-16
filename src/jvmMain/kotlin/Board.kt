@@ -104,7 +104,6 @@ fun BoardView() {
 fun PieceBoardView(game: Game) {
     for (piece in game.board.value.getPieces())
         PieceView(game, piece)
-
 }
 
 val Color.Companion.DarkSquare: Color
