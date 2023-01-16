@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import piece.Piece
 import piece.PieceColor
 import piece.PieceView
@@ -103,11 +102,9 @@ fun BoardView() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PieceBoardView(game: Game) {
-    for (piece in game.board.value.getPieces()) {
-        Box(Modifier.zIndex(if (piece.state.focused.value) 2f else 1f)) {
-            PieceView(game, piece)
-        }
-    }
+    for (piece in game.board.value.getPieces())
+        PieceView(game, piece)
+
 }
 
 val Color.Companion.DarkSquare: Color

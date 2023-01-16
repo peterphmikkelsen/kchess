@@ -20,6 +20,7 @@ import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import kotlin.math.roundToInt
 
 
@@ -45,7 +46,7 @@ fun PieceView(game: Game, piece: Piece?) {
     piece ?: return
     val offset = mutableStateOf(piece.toWindowPosition())
 
-    Box(Modifier.size(Constants.SQUARE_SIZE.dp)) {
+    Box(Modifier.size(Constants.SQUARE_SIZE.dp).zIndex(if (piece.state.focused.value) 2f else 1f)) {
         Image(
             painter = painterResource("${piece.name}_${piece.color}.svg"),
             contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
@@ -54,26 +55,20 @@ fun PieceView(game: Game, piece: Piece?) {
                 .onDrag(
                     onDragStart = { piece.focus() },
                     onDragEnd = {
-                        println(piece.state.focused.value)
-                        // Move piece to center of square on release
-                        offset.value = offset.centerToSquare()
+                        offset.snapToCenterOfSquare()
 
-                        // Move piece in internal game logic
                         val moved = game.board.value.move(piece.position, offset.toLogicalPosition())
-
-                        // Don't end the turn if the move was not successful
                         if (!moved) {
-                            // Reset position
                             offset.value = piece.toWindowPosition()
                             piece.unFocus()
                             return@onDrag
                         }
 
-                        // TODO: Fix bug that increases offset when this is on
-                        // game.state.endTurn()
                         game.endTurn()
-
-                        println(game.board.value)
+                        piece.unFocus()
+                    },
+                    onDragCancel = {
+                        offset.value = piece.toWindowPosition()
                         piece.unFocus()
                     }
                 ) {
@@ -84,9 +79,9 @@ fun PieceView(game: Game, piece: Piece?) {
     }
 }
 
-private fun MutableState<Offset>.centerToSquare(): Offset {
+private fun MutableState<Offset>.snapToCenterOfSquare() {
     val squareOffset = Constants.SQUARE_SIZE * 2
-    return Offset(
+    this.value = Offset(
         (this.value.x / squareOffset).roundToInt() * squareOffset,
         (this.value.y / squareOffset).roundToInt() * squareOffset
     )
