@@ -1,9 +1,9 @@
 package piece.type
 
-import Position
 import piece.Piece
 import piece.PieceColor
 import piece.PieceState
+import utils.Position
 
 class Rook(
     override val color: PieceColor,

@@ -1,3 +1,5 @@
+package game
+
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import piece.PieceColor

@@ -1,8 +1,5 @@
 package piece
 
-import Constants
-import Game
-import Position
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.onDrag
@@ -22,6 +19,9 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import game.Game
+import utils.Constants
+import utils.Position
 import kotlin.math.roundToInt
 
 
@@ -39,6 +39,8 @@ interface Piece {
     fun unFocus() {
         state.focused.value = false
     }
+
+    fun isFocused() = state.focused.value
 }
 
 @ExperimentalFoundationApi
@@ -48,7 +50,7 @@ fun PieceView(game: Game, piece: Piece?) {
     val density = mutableStateOf(LocalDensity.current.density)
     val offset = mutableStateOf(piece.toWindowPosition(density))
 
-    Box(Modifier.size(Constants.SQUARE_SIZE.dp).zIndex(if (piece.state.focused.value) 2f else 1f)) {
+    Box(Modifier.size(Constants.SQUARE_SIZE.dp).zIndex(if (piece.isFocused()) 2f else 1f)) {
         Image(
             painter = painterResource("${piece.name}_${piece.color}.svg"),
             contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
@@ -79,6 +81,13 @@ fun PieceView(game: Game, piece: Piece?) {
                 }
         )
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PiecesView(game: Game) {
+    for (piece in game.board.value.getPieces())
+        PieceView(game, piece)
 }
 
 private fun MutableState<Offset>.snapToCenterOfSquare(density: MutableState<Float>) {

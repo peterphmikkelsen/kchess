@@ -1,4 +1,5 @@
-
+package game
+import utils.Constants
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,7 +10,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import board.Board
+import board.BoardView
 import piece.PieceColor
+import piece.PiecesView
 
 class Game {
     val state = GameState()
@@ -42,7 +46,7 @@ fun GameView() {
         Row {
             Box(Modifier.size((8 * Constants.SQUARE_SIZE).dp).border(3.dp, Color.Black)) {
                 BoardView()
-                PieceBoardView(game)
+                PiecesView(game)
             }
 
             // TODO: Move to separate Composable

@@ -1,15 +1,21 @@
-
-import androidx.compose.foundation.ExperimentalFoundationApi
+package board
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import piece.Piece
 import piece.PieceColor
-import piece.PieceView
 import piece.type.*
+import utils.Constants
+import utils.DarkSquare
+import utils.LightSquare
+import utils.Position
+
 
 class Board {
     private var board = Array(8) { arrayOfNulls<Piece>(8) }
@@ -98,16 +104,3 @@ fun BoardView() {
         }
     }
 }
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun PieceBoardView(game: Game) {
-    for (piece in game.board.value.getPieces())
-        PieceView(game, piece)
-}
-
-val Color.Companion.DarkSquare: Color
-    get() = this.DarkGray
-
-val Color.Companion.LightSquare: Color
-    get() = this.LightGray
