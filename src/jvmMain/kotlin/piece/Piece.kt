@@ -3,15 +3,13 @@ package piece
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.onDrag
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.capitalize
@@ -48,20 +46,20 @@ interface Piece {
 fun PieceView(game: Game, piece: Piece?) {
     piece ?: return
     val density = mutableStateOf(LocalDensity.current.density)
-    val offset = mutableStateOf(piece.toWindowPosition(density))
+    val offset = mutableStateOf(Offset.Zero)
 
     Box(Modifier.size(Constants.SQUARE_SIZE.dp).zIndex(if (piece.isFocused()) 2f else 1f)) {
         Image(
             painter = painterResource("${piece.name}_${piece.color}.svg"),
             contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().positionPiece(piece, density)
                 .offset { IntOffset(offset.value.x.toInt(), offset.value.y.toInt()) }
                 .onDrag(
                     onDragStart = { piece.focus() },
                     onDragEnd = {
                         offset.snapToCenterOfSquare(density)
 
-                        val moved = game.board.value.move(piece.position, offset.toLogicalPosition(density))
+                        val moved = game.board.value.move(piece.position, piece.toLogicalPosition(offset, density))
                         if (!moved) {
                             offset.value = piece.toWindowPosition(density)
                             piece.unFocus()
@@ -70,6 +68,7 @@ fun PieceView(game: Game, piece: Piece?) {
 
                         game.endTurn()
                         piece.unFocus()
+                        println(game.board.value)
                     },
                     onDragCancel = {
                         offset.value = piece.toWindowPosition(density)
@@ -103,9 +102,17 @@ private fun Piece.toWindowPosition(density: MutableState<Float>): Offset {
     return Offset(this.position.second * squareOffset, this.position.first * squareOffset)
 }
 
-private fun MutableState<Offset>.toLogicalPosition(density: MutableState<Float>): Position {
+private fun Piece.toLogicalPosition(offset: MutableState<Offset>, density: MutableState<Float>): Position {
     val squareOffset = Constants.SQUARE_SIZE * density.value
-    val newPositionY = (this.value.x / squareOffset).roundToInt()
-    val newPositionX = (this.value.y / squareOffset).roundToInt()
+    val newPositionX = (this.position.first + (offset.value.y / squareOffset)).roundToInt()
+    val newPositionY = (this.position.second + (offset.value.x / squareOffset)).roundToInt()
     return Position(newPositionX, newPositionY)
+}
+
+private fun Modifier.positionPiece(piece: Piece, density: MutableState<Float>) = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val pieceLocation = piece.toWindowPosition(density)
+    layout(placeable.width, placeable.height) {
+        placeable.placeRelative(IntOffset(pieceLocation.x.toInt(), pieceLocation.y.toInt()))
+    }
 }
