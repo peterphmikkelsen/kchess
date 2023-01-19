@@ -9,6 +9,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -20,6 +22,7 @@ import androidx.compose.ui.zIndex
 import game.Game
 import utils.Constants
 import utils.Position
+import java.awt.Cursor
 import kotlin.math.roundToInt
 
 
@@ -53,6 +56,7 @@ fun PieceView(game: Game, piece: Piece?) {
             painter = painterResource("${piece.name}_${piece.color}.svg"),
             contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
             modifier = Modifier.fillMaxSize().positionPiece(piece, density)
+                .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
                 .offset { IntOffset(offset.value.x.toInt(), offset.value.y.toInt()) }
                 .onDrag(
                     onDragStart = { piece.focus() },
