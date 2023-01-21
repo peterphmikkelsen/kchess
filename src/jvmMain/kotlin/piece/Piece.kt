@@ -34,7 +34,7 @@ interface Piece {
     val name: String
     val color: PieceColor
     var position: Position
-    var state: PieceState
+    val state: PieceState
     fun isValidMove(board: Array<Array<Piece?>>, to: Position): Boolean
 
     fun focus() {
@@ -46,6 +46,8 @@ interface Piece {
     }
 
     fun isFocused() = state.focused.value
+
+    fun isNotTurnColor(game: Game) = color != game.state.turn.value
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -60,30 +62,30 @@ fun PieceView(game: Game, piece: Piece?) {
         Image(
             painter = painterResource("${piece.name}_${piece.color}.svg"),
             contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
-            modifier = Modifier.fillMaxSize().positionPiece(piece, density)
+            modifier = Modifier.fillMaxSize().positionPiece(piece, density).offset { offset.toInt() }
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
-                .onPointerEvent(PointerEventType.Press) { offset.snapToCenterOfCursor(it.changes.first().position, density) }
-                .onPointerEvent(PointerEventType.Release) { offset.snapToCenterOfSquare(density) }
-                .offset { offset.toInt() }
-                .onDrag(
-                    onDragStart = { piece.focus() },
-                    onDragEnd = {
-                        val moved = game.board.value.move(piece.position, piece.toLogicalPosition(offset, density))
-                        if (!moved) {
-                            offset.value = piece.toWindowPosition(density)
-                            piece.unFocus()
-                            return@onDrag
-                        }
+                .onPointerEvent(PointerEventType.Press) {
+                    if (piece.isNotTurnColor(game)) return@onPointerEvent
 
-                        game.endTurn()
+                    offset.snapToCenterOfCursor(it.changes.first().position, density)
+                    // TODO: Somehow this breaks the snap to cursor functionality
+//                    piece.focus()
+
+                }
+                .onPointerEvent(PointerEventType.Release) {
+                    offset.snapToCenterOfSquare(density)
+
+                    val moved = game.board.value.move(piece.position, piece.toLogicalPosition(offset, density))
+                    if (!moved) {
                         piece.unFocus()
-                    },
-                    onDragCancel = {
-                        offset.value = piece.toWindowPosition(density)
-                        piece.unFocus()
+                        return@onPointerEvent
                     }
-                ) {
-                    if (piece.color != game.state.turn.value) return@onDrag
+                    
+                    piece.unFocus()
+                    game.endTurn()
+                }
+                .onDrag {
+                    if (piece.isNotTurnColor(game)) return@onDrag
                     offset.value += it
                 }
         )
