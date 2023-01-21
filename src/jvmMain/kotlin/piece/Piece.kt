@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
@@ -22,6 +25,7 @@ import androidx.compose.ui.zIndex
 import game.Game
 import utils.Constants
 import utils.Position
+import utils.toInt
 import java.awt.Cursor
 import kotlin.math.roundToInt
 
@@ -44,6 +48,7 @@ interface Piece {
     fun isFocused() = state.focused.value
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalFoundationApi
 @Composable
 fun PieceView(game: Game, piece: Piece?) {
@@ -57,12 +62,12 @@ fun PieceView(game: Game, piece: Piece?) {
             contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
             modifier = Modifier.fillMaxSize().positionPiece(piece, density)
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
-                .offset { IntOffset(offset.value.x.toInt(), offset.value.y.toInt()) }
+                .onPointerEvent(PointerEventType.Press) { offset.snapToCenterOfCursor(it.changes.first().position, density) }
+                .onPointerEvent(PointerEventType.Release) { offset.snapToCenterOfSquare(density) }
+                .offset { offset.toInt() }
                 .onDrag(
                     onDragStart = { piece.focus() },
                     onDragEnd = {
-                        offset.snapToCenterOfSquare(density)
-
                         val moved = game.board.value.move(piece.position, piece.toLogicalPosition(offset, density))
                         if (!moved) {
                             offset.value = piece.toWindowPosition(density)
@@ -72,7 +77,6 @@ fun PieceView(game: Game, piece: Piece?) {
 
                         game.endTurn()
                         piece.unFocus()
-                        println(game.board.value)
                     },
                     onDragCancel = {
                         offset.value = piece.toWindowPosition(density)
@@ -99,6 +103,13 @@ private fun MutableState<Offset>.snapToCenterOfSquare(density: MutableState<Floa
         (this.value.x / squareOffset).roundToInt() * squareOffset,
         (this.value.y / squareOffset).roundToInt() * squareOffset
     )
+}
+
+private fun MutableState<Offset>.snapToCenterOfCursor(cursorPosition: Offset, density: MutableState<Float>) {
+    val squareOffset = Constants.SQUARE_SIZE / (if (density.value == 1f) 2 else 1) // TODO: This is super hacky
+    val positionX = cursorPosition.x - squareOffset
+    val positionY = cursorPosition.y - squareOffset
+    this.value = Offset(positionX, positionY)
 }
 
 private fun Piece.toWindowPosition(density: MutableState<Float>): Offset {
