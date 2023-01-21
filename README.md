@@ -1,5 +1,13 @@
-# Kotlin Chess
-The ancient, famous game of chess - written using the young, little-known UI framework [Compose for Desktop](https://www.jetbrains.com/lp/compose-desktop/).
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/31919921/213880607-4ce7a5b4-6e14-43a2-b56c-1aadbaed2930.png">
+</p>
+
+<p align="center">
+  The ancient, famous game of chess - written using the young, little-known UI framework <a href="https://www.jetbrains.com/lp/compose-desktop/">Compose for Desktop</a>.
+</p>
+
+---
 
 > **Note** </br>
 This is still a work in progress
