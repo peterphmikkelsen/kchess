@@ -34,18 +34,8 @@ interface Piece {
     val name: String
     val color: PieceColor
     var position: Position
-    val state: PieceState
+
     fun isValidMove(board: Array<Array<Piece?>>, to: Position): Boolean
-
-    fun focus() {
-        state.focused.value = true
-    }
-
-    fun unFocus() {
-        state.focused.value = false
-    }
-
-    fun isFocused() = state.focused.value
 
     fun isNotTurnColor(game: Game) = color != game.state.turn.value
 }
@@ -53,12 +43,11 @@ interface Piece {
 @OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalFoundationApi
 @Composable
-fun PieceView(game: Game, piece: Piece?) {
+fun PieceView(game: Game, piece: Piece?, offset: MutableState<Offset>, focused: MutableState<Boolean>) {
     piece ?: return
     val density = mutableStateOf(LocalDensity.current.density)
-    val offset = mutableStateOf(Offset.Zero)
 
-    Box(Modifier.size(Constants.SQUARE_SIZE.dp).zIndex(if (piece.isFocused()) 2f else 1f)) {
+    Box(Modifier.size(Constants.SQUARE_SIZE.dp).zIndex(if (focused.value) 2f else 1f)) {
         Image(
             painter = painterResource("${piece.name}_${piece.color}.svg"),
             contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
@@ -67,21 +56,19 @@ fun PieceView(game: Game, piece: Piece?) {
                 .onPointerEvent(PointerEventType.Press) {
                     if (piece.isNotTurnColor(game)) return@onPointerEvent
 
-                    offset.snapToCenterOfCursor(it.changes.first().position, density)
-                    // TODO: Somehow this breaks the snap to cursor functionality
-//                    piece.focus()
-
+                    offset.value = snapToCursor(it.changes.first().position, density)
+                    focused.value = true
                 }
                 .onPointerEvent(PointerEventType.Release) {
                     offset.snapToCenterOfSquare(density)
 
                     val moved = game.board.value.move(piece.position, piece.toLogicalPosition(offset, density))
                     if (!moved) {
-                        piece.unFocus()
+                        focused.value = false
                         return@onPointerEvent
                     }
-                    
-                    piece.unFocus()
+
+                    focused.value = false
                     game.endTurn()
                 }
                 .onDrag {
@@ -95,8 +82,11 @@ fun PieceView(game: Game, piece: Piece?) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PiecesView(game: Game) {
-    for (piece in game.board.value.getPieces())
-        PieceView(game, piece)
+    for (piece in game.board.value.getPieces()) {
+        val offset = mutableStateOf(Offset.Zero)
+        val focused = mutableStateOf(false)
+        PieceView(game, piece, offset, focused)
+    }
 }
 
 private fun MutableState<Offset>.snapToCenterOfSquare(density: MutableState<Float>) {
@@ -107,11 +97,11 @@ private fun MutableState<Offset>.snapToCenterOfSquare(density: MutableState<Floa
     )
 }
 
-private fun MutableState<Offset>.snapToCenterOfCursor(cursorPosition: Offset, density: MutableState<Float>) {
+private fun snapToCursor(cursorPosition: Offset, density: MutableState<Float>): Offset {
     val squareOffset = Constants.SQUARE_SIZE / (if (density.value == 1f) 2 else 1) // TODO: This is super hacky
     val positionX = cursorPosition.x - squareOffset
     val positionY = cursorPosition.y - squareOffset
-    this.value = Offset(positionX, positionY)
+    return Offset(positionX, positionY)
 }
 
 private fun Piece.toWindowPosition(density: MutableState<Float>): Offset {
