@@ -75,6 +75,7 @@ fun PieceView(game: Game, piece: Piece?, offset: MutableState<Offset>, focused: 
 
                     val moved = game.board.value.move(piece.position, piece.toLogicalPosition(offset, density))
                     if (!moved) {
+                        offset.value = Offset.Zero
                         focused.value = false
                         return@onPointerEvent
                     }
