@@ -22,6 +22,10 @@ kotlin {
             kotlinOptions.jvmTarget = "17"
         }
         withJava()
+
+        testRuns["test"].executionTask.configure {
+            useJUnitPlatform()
+        }
     }
     sourceSets {
         val jvmMain by getting {
@@ -29,7 +33,11 @@ kotlin {
                 implementation(compose.desktop.currentOs)
             }
         }
-        val jvmTest by getting
+        val jvmTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
     }
 }
 
