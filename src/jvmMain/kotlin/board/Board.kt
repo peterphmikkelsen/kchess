@@ -46,6 +46,7 @@ class Board {
 
     fun move(from: Position, to: Position): Boolean {
         if (from == to) return false
+        if (to.isOutOfBounds()) return false
 
         val piece = board[from.first][from.second] ?: return false
         val toPiece = board[to.first][to.second]
