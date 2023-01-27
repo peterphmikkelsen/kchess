@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   width="44.8195"
+   height="40.614464"
+   id="svg707"
+   sodipodi:docname="queen_white.svg"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs711">
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter723"
+       x="-0.14566216"
+       y="-0.073082706"
+       width="1.2113378"
+       height="1.2214876">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood713" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite715" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="0.7"
+         result="blur"
+         id="feGaussianBlur717" />
+      <feOffset
+         dx="-2.9595"
+         dy="2.5"
+         result="offset"
+         id="feOffset719" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite721" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="namedview709"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="22.822222"
+     inkscape:cx="23.880234"
+     inkscape:cy="18.928919"
+     inkscape:window-width="2560"
+     inkscape:window-height="1369"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg707" />
+  <g
+     style="fill:#ffffff;stroke:#000000;stroke-width:1.5;stroke-linejoin:round;filter:url(#filter723)"
+     id="g705"
+     transform="translate(1.3894999,-3.57)">
+    <path
+       d="m 9,26 c 8.5,-1.5 21,-1.5 27,0 L 38.5,13.5 31,25 30.7,10.9 25.5,24.5 22.5,10 19.5,24.5 14.3,10.9 14,25 6.5,13.5 Z"
+       id="path687" />
+    <path
+       d="m 9,26 c 0,2 1.5,2 2.5,4 1,1.5 1,1 0.5,3.5 -1.5,1 -1,2.5 -1,2.5 -1.5,1.5 0,2.5 0,2.5 6.5,1 16.5,1 23,0 0,0 1.5,-1 0,-2.5 0,0 0.5,-1.5 -1,-2.5 -0.5,-2.5 -0.5,-2 0.5,-3.5 1,-2 2.5,-2 2.5,-4 -8.5,-1.5 -18.5,-1.5 -27,0 z"
+       id="path689" />
+    <path
+       d="M 11.5,30 C 15,29 30,29 33.5,30"
+       style="fill:none"
+       id="path691" />
+    <path
+       d="m 12,33.5 c 6,-1 15,-1 21,0"
+       style="fill:none"
+       id="path693" />
+    <circle
+       cx="6"
+       cy="12"
+       r="2"
+       id="circle695" />
+    <circle
+       cx="14"
+       cy="9"
+       r="2"
+       id="circle697" />
+    <circle
+       cx="22.5"
+       cy="8"
+       r="2"
+       id="circle699" />
+    <circle
+       cx="31"
+       cy="9"
+       r="2"
+       id="circle701" />
+    <circle
+       cx="39"
+       cy="12"
+       r="2"
+       id="circle703" />
+  </g>
+</svg>

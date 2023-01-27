@@ -4,11 +4,14 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.onDrag
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -19,6 +22,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -49,9 +53,9 @@ fun PieceView(game: Game, piece: Piece?, offset: MutableState<Offset>, focused: 
 
     Box(Modifier.size(Constants.SQUARE_SIZE.dp).zIndex(if (focused.value) 2f else 1f)) {
         Image(
-            painter = painterResource("${piece.name}_${piece.color}.svg"),
+            painter = painterResource(if (focused.value) "${piece.name}_${piece.color}_shadow.svg" else "${piece.name}_${piece.color}.svg"),
             contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
-            modifier = Modifier.fillMaxSize().positionPiece(piece, density).offset { offset.toInt() }
+            modifier = Modifier.size(piece.getSize(focused.value)).positionPiece(piece, density).offset { offset.toInt() }
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
                 .onPointerEvent(PointerEventType.Press) {
                     if (piece.isNotTurnColor(game)) return@onPointerEvent
@@ -121,5 +125,14 @@ private fun Modifier.positionPiece(piece: Piece, density: MutableState<Float>) =
     val pieceLocation = piece.toWindowPosition(density)
     layout(placeable.width, placeable.height) {
         placeable.placeRelative(IntOffset(pieceLocation.x.toInt(), pieceLocation.y.toInt()))
+    }
+}
+
+private fun Piece.getSize(focused: Boolean): Dp {
+    if (!focused) {
+        return Constants.SQUARE_SIZE.dp
+    } else {
+        if (this.name == "queen") return Constants.SQUARE_SIZE.dp
+        return (Constants.SQUARE_SIZE - 15).dp
     }
 }
