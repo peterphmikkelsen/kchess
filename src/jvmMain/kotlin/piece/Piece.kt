@@ -4,14 +4,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.onDrag
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -56,11 +54,12 @@ fun PieceView(game: Game, piece: Piece?, offset: MutableState<Offset>, focused: 
             painter = painterResource(if (focused.value) "${piece.name}_${piece.color}_shadow.svg" else "${piece.name}_${piece.color}.svg"),
             contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
             modifier = Modifier.size(piece.getSize(focused.value)).positionPiece(piece, density).offset { offset.toInt() }
+                .rotate(if (game.state.view.value) 0f else 180f)
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
                 .onPointerEvent(PointerEventType.Press) {
                     if (piece.isNotTurnColor(game)) return@onPointerEvent
 
-                    offset.value = snapToCursor(it.changes.first().position, density)
+                    offset.value = snapToCursor(game, it.changes.first().position, density)
                     focused.value = true
                 }
                 .onPointerEvent(PointerEventType.Release) {
@@ -77,7 +76,11 @@ fun PieceView(game: Game, piece: Piece?, offset: MutableState<Offset>, focused: 
                 }
                 .onDrag {
                     if (piece.isNotTurnColor(game)) return@onDrag
-                    offset.value += it
+                    if (game.state.view.value) {
+                        offset.value += it
+                    } else {
+                        offset.value -= it
+                    }
                 }
         )
     }
@@ -101,11 +104,11 @@ private fun MutableState<Offset>.snapToCenterOfSquare(density: MutableState<Floa
     )
 }
 
-private fun snapToCursor(cursorPosition: Offset, density: MutableState<Float>): Offset {
+private fun snapToCursor(game: Game, cursorPosition: Offset, density: MutableState<Float>): Offset {
     val squareOffset = Constants.SQUARE_SIZE / (if (density.value == 1f) 2 else 1) // TODO: This is super hacky
     val positionX = cursorPosition.x - squareOffset
     val positionY = cursorPosition.y - squareOffset
-    return Offset(positionX, positionY)
+    return if (game.state.view.value) Offset(positionX, positionY) else Offset(-(positionX-10), -(positionY-5))
 }
 
 private fun Piece.toWindowPosition(density: MutableState<Float>): Offset {
