@@ -1,4 +1,3 @@
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toPainter
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -10,7 +9,7 @@ import java.io.File
 import javax.imageio.ImageIO
 
 fun main() = singleWindowApplication(
-    title = "Kotlin Chess", state = WindowState(size = DpSize(1200.dp, 1000.dp)),
+    title = "", state = WindowState(size = DpSize(1200.dp, 1000.dp)),
     icon = getGameIcon().toPainter()
 ) {
     GameView()

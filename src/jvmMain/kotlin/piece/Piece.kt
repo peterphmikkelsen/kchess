@@ -1,32 +1,39 @@
 package piece
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.onDrag
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import game.Game
+import piece.type.*
 import utils.Constants
 import utils.Position
+import utils.Shapes
 import utils.toInt
 import java.awt.Cursor
 import kotlin.math.roundToInt
@@ -50,10 +57,11 @@ fun PieceView(game: Game, piece: Piece?, offset: MutableState<Offset>, focused: 
     val density = mutableStateOf(LocalDensity.current.density)
 
     Box(Modifier.size(Constants.SQUARE_SIZE.dp).zIndex(if (focused.value) 2f else 1f)) {
-        Image(
-            painter = painterResource(if (focused.value) "${piece.name}_${piece.color}_shadow.svg" else "${piece.name}_${piece.color}.svg"),
-            contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
-            modifier = Modifier.size(piece.getSize(focused.value)).positionPiece(piece, density).offset { offset.toInt() }
+        Box(
+//            painter = painterResource(if (focused.value) "${piece.name}_${piece.color}_shadow.svg" else "${piece.name}_${piece.color}.svg"),
+//            contentDescription = "${piece.color} piece.type.${piece.name.capitalize(Locale.current)}",
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize().positionPiece(piece, density).offset { offset.toInt() }
                 .rotate(if (game.state.view.value) 0f else 180f)
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
                 .onPointerEvent(PointerEventType.Press) {
@@ -82,7 +90,9 @@ fun PieceView(game: Game, piece: Piece?, offset: MutableState<Offset>, focused: 
                         offset.value -= it
                     }
                 }
-        )
+        ) {
+            piece.Design(focused)
+        }
     }
 }
 
@@ -131,11 +141,29 @@ private fun Modifier.positionPiece(piece: Piece, density: MutableState<Float>) =
     }
 }
 
-private fun Piece.getSize(focused: Boolean): Dp {
-    if (!focused) {
-        return Constants.SQUARE_SIZE.dp
-    } else {
-        if (this.name == "queen") return Constants.SQUARE_SIZE.dp
-        return (Constants.SQUARE_SIZE - 15).dp
+@Composable
+private fun Piece.Design(focused: MutableState<Boolean>) {
+    val color = if (this.color == PieceColor.WHITE) Color.White else Color.Black
+    val shadow = if (focused.value) 15.dp else 0.dp
+    when (this) {
+        is Pawn -> Box(modifier = Modifier.shadow(shadow).background(color).fillMaxSize(0.4f))
+        is Rook -> Box(modifier = Modifier.shadow(shadow).background(color).fillMaxSize(0.6f))
+        is Bishop -> PieceGraphic(Shapes.Triangle, 0.6f, shadow, color)
+        is Knight -> PieceGraphic(Shapes.L, 0.6f, shadow, color)
+        is Queen -> PieceGraphic(Shapes.Octagon, 0.7f, shadow, color)
+        is King -> Box(modifier = Modifier.rotate(-18f).graphicsLayer {
+            shadowElevation = shadow.toPx()
+            shape = Shapes.Pentagon
+            clip = true
+        }.fillMaxSize(0.7f).background(color))
     }
+}
+
+@Composable
+private fun PieceGraphic(pieceShape: Shape, size: Float, shadow: Dp, color: Color) {
+    Box(modifier = Modifier.graphicsLayer {
+        shadowElevation = shadow.toPx()
+        shape = pieceShape
+        clip = true
+    }.fillMaxSize(size).background(color))
 }
