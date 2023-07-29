@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-  The ancient, famous game of chess - written using the young, little-known UI framework <a href="https://www.jetbrains.com/lp/compose-desktop/">Compose for Desktop</a>.
+  The ancient, famous game of chess - written using the young, little-known UI framework <a href="https://github.com/JetBrains/compose-multiplatform-desktop-template/#readme">Compose for Desktop</a>.
 </p>
 
 ---
