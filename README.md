@@ -9,8 +9,8 @@
 
 ---
 
-> **Note** </br>
-This is still a work in progress
+> [!note]
+> This is still a work in progress
 
 ### Motivation
 
