@@ -79,6 +79,12 @@ fun PieceView(game: Game, piece: Piece?, offset: MutableState<Offset>, focused: 
                         return@onPointerEvent
                     }
 
+                    // Cannot combine into one because of casting not working
+                    when (piece) {
+                        is King -> piece.hasMoved = true
+                        is Rook -> piece.hasMoved = true
+                    }
+
                     focused.value = false
                     game.endTurn()
                 }

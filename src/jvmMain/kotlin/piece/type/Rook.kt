@@ -7,6 +7,7 @@ import utils.Position
 class Rook(
     override val color: PieceColor,
     override var position: Position,
+    var hasMoved: Boolean = false
 ): Piece {
     override val name: String
         get() = "rook"

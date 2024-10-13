@@ -15,5 +15,5 @@ class Knight(
         return true
     }
 
-    override fun toString() = "Kn"
+    override fun toString() = "N"
 }

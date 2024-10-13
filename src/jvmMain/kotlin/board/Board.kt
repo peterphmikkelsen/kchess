@@ -19,8 +19,14 @@ import utils.Position
 
 class Board {
     private var board = Array(8) { arrayOfNulls<Piece>(8) }
+    val moves = mutableListOf<String>()
 
     init {
+        reset()
+    }
+
+    fun reset() {
+        board = Array(8) { arrayOfNulls(8) }
         for (i in 0 until 8) {
             for (j in 0 until 8) {
                 val position = Position(i, j)
@@ -32,16 +38,17 @@ class Board {
                 if (i == 0 || i == 7) {
                     val color = if (i == 0) PieceColor.BLACK else PieceColor.WHITE
                     board[i][j] = when (j) {
-                        4 -> King(color, position)
+                        4 -> King(color, position, false)
                         3 -> Queen(color, position)
                         2, 5 -> Bishop(color, position)
                         1, 6 -> Knight(color, position)
-                        0, 7 -> Rook(color, position)
+                        0, 7 -> Rook(color, position, false)
                         else -> null
                     }
                 }
             }
         }
+        moves.clear()
     }
 
     fun move(from: Position, to: Position): Boolean {
@@ -53,8 +60,9 @@ class Board {
         if (toPiece != null && piece.color == toPiece.color) return false
         if (!piece.isValidMove(board, to)) return false
 
+        moves.add(moveToChessNotation(from, to))
+
         // Make move on board
-        // TODO: Handle attack logic
         board[from.first][from.second] = null
         board[to.first][to.second] = piece
 
@@ -72,6 +80,40 @@ class Board {
         val pieces = mutableListOf<Piece>()
         this.board.forEach { pieces.addAll(it.filterNotNull()) }
         return pieces
+    }
+
+    fun moveToChessNotation(from: Position, to: Position): String {
+        val fromPiece = board[from.first][from.second]
+        val toPiece = board[to.first][to.second]
+        return buildString {
+            if (fromPiece!!.name != "pawn") append(fromPiece)
+            if (toPiece != null) {
+                if (fromPiece is Pawn) append('a' + from.second)
+                append("x")
+            }
+            append('a' + to.second)
+            append(8 - to.first)
+        }
+    }
+
+    fun boardToFen(): String {
+        return buildString {
+            for (row in board) {
+                var empty = 0
+                for (piece in row) {
+                    if (piece != null) {
+                        if (empty > 0) {
+                            append(empty)
+                            empty = 0
+                        }
+                        if (piece.color == PieceColor.WHITE) append(piece) else append(piece.toString().lowercase())
+                    } else empty++
+                }
+                if (empty > 0) append(empty)
+                append("/")
+            }
+
+        }.dropLast(1)
     }
 
     override fun toString(): String {
